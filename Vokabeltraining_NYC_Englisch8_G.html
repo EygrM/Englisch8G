@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NYC · Vokabeltraining Englisch 8</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;color:#18263b;font:1rem/1.55 system-ui,sans-serif}header{background:#142d48;color:white;padding:2rem 1rem}header div,main{max-width:48rem;margin:auto}h1{font-size:clamp(2rem,6vw,3rem);margin:.25rem 0;line-height:1.1}main{padding:1rem}details.round,.panel{background:white;border:1px solid #cad6e6;border-radius:.8rem;margin:0 0 1rem;padding:1rem}.round>summary{font-weight:750;font-size:1.12rem}summary{cursor:pointer;color:#173e65}.count{display:block;font-weight:500;font-size:.88rem;color:#415972}article{border-top:1px solid #d9e1ec;padding:1rem 0;margin-top:.6rem}label{display:block;font-weight:700}input,select,button{font:inherit;border-radius:.4rem;padding:.5rem;border:1px solid #587494}input{max-width:100%;width:23rem;margin:.35rem .4rem .35rem 0}button{background:#183f67;color:white;cursor:pointer}button:disabled{opacity:.5;cursor:default}progress{display:block;width:100%;height:1rem;accent-color:#245f98;margin:.45rem 0}p{margin:.5rem 0}.solution,.good{color:#16623b;font-weight:700}.near{color:#884504;font-weight:700}.feedback:empty{display:none}.answer{background:#edf5ef;border-radius:.4rem;padding:.55rem .75rem;margin-top:.5rem}:focus-visible{outline:3px solid #ae560c;outline-offset:2px}
+.pitfall{background:#fff5e4;border:1px solid #eed6ad;border-radius:.4rem;padding:.55rem .75rem;margin-top:.5rem}
+[hidden]{display:none!important}
+form{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+form label{flex-basis:100%}
+input,select,button{font-size:1rem;min-height:44px}
+form input{margin:0;min-width:0}
+summary{padding:.5rem 0}
+@media(max-width:520px){
+header{padding:1.35rem .85rem}main{padding:.65rem}
+details.round,.panel{padding:.8rem}
+form input,form button,select{width:100%}
+}
+</style>
+<header><div><small>ENGLISCH 8 · G-KURS · UNIT 1</small><h1>NYC Vocabulary</h1><div>Wiederholung nach der Lernspur oder als Hausaufgabe</div></div></header>
+<main>
+<div id="preview-help" class="panel" role="status">
+  <strong>Die Übung ist in dieser Ansicht noch nicht gestartet.</strong>
+  <p>Wenn du auf dem iPhone eine Dateivorschau siehst, speichere die HTML-Datei über das Teilen-Symbol in „Dateien“. Öffne dann den HTML-Viewer in Safari und wähle die gespeicherte Datei dort aus.</p>
+</div>
+<div id="exercise" hidden>
+<div class="panel">
+<p>Wähle eine Richtung und klappe eine Runde auf. Tippe deine Übersetzung ein und prüfe sie. Wenn deine Antwort noch nicht stimmt, kannst du „Typische Stolperfallen“ aufklappen und es danach erneut versuchen.</p>
+<label for="direction">Übungsrichtung</label>
+<select id="direction"><option value="0">Deutsch → Englisch</option><option value="1">Englisch → Deutsch</option></select>
+<p id="progress-text" role="status"></p><progress id="progress" value="0" aria-label="Geprüfte Wörter"></progress>
+<small id="storage">Dein Stand wird in diesem Browser gespeichert, sofern er lokales Speichern erlaubt.</small>
+</div>
+<div id="rounds"></div>
+<button id="reset" type="button">Übungsrichtung und US-Runde zurücksetzen</button>
+</div>
+</main>
+<script>
+const rounds = [
+  ['New York und unterwegs', [
+    ['die Freiheit','liberty|freedom'],
+    ['etwas lieber mögen','prefer sth. to sth.|prefer something to something|prefer','In „I prefer tea to coffee“ steht das Lieblingsgetränk zuerst.'],
+    ['unterwegs','out and about'],
+    ['der Akzent','accent'],
+    ['Heimweh haben','be homesick|feel homesick|homesick','Wenn du sagst, wonach du Heimweh hast, folgt „for“.'],
+    ['der Handel','trade'],
+    ['die Fähre','ferry'],
+    ['der Einheimische / die Einheimische','local'],
+    ['klasse / großartig','awesome|great'],
+    ['der Einwanderer / die Einwanderin','immigrant','„Immigrant“ beginnt mit i und hat zwei m.'],
+    ['das Fahrgeschäft im Freizeitpark','ride']
+  ]],
+  ['Menschen und Zusammenleben', [
+    ['unterschiedlich / vielfältig','diverse|varied'],
+    ['das Diagramm / die Tabelle','chart'],
+    ['getrennt / separat','separate','Merke dir die Mitte des Wortes: sep-a-rate.'],
+    ['das Komma','comma'],
+    ['bestimmt / gewiss / sicher','certain'],
+    ['damals','back then|then'],
+    ['gleichberechtigt','equal'],
+    ['die Gelegenheit / die Chance','opportunity|chance','„Opportunity“ hat zwei p.'],
+    ['der Enkel / die Enkelin','grandchild'],
+    ['die Universität','university'],
+    ['die Herausforderung','challenge','„Challenge“ hat zwei l.'],
+    ["die Enkelkinder / die Enkel", "grandchildren", "„Grandchildren“ ist die Mehrzahl von „grandchild“. Die Endung lautet „-children“."]
+  ]],
+  ['Alltag und American English', [
+    ['der Mund','mouth'],
+    ['die öffentliche Toilette (US)','restroom'],
+    ['der Rucksack (US)','backpack'],
+    ['der Keks (US)','cookie'],
+    ['der Film (US)','movie'],
+    ['das Kino (US)','movie theater'],
+    ['die Turnschuhe (US)','sneakers'],
+    ['die U-Bahn (US)','subway'],
+    ['der Urlaub (US)','vacation'],
+    ['die Pommes frites (US)','French fries|french fries|fries','In Großbritannien heißen Pommes „chips“.'],
+    ['die Kartoffelchips (US)','potato chips|chips','In Großbritannien heißen Kartoffelchips „crisps“.'],
+    ["die Mama / die Mutti (US)", "mom", "„Mom“ schreibt man in den USA mit o. In Großbritannien sagt man „mum“."],
+    ["die Hose (US)", "pants", "„Pants“ steht im Englischen in der Mehrzahl, auch wenn nur eine Hose gemeint ist."],
+    ["der Laden / das Geschäft (US)", "store", "Für einen Laden steht hier die US-Vokabel „store“. In der britischen Liste steht „shop“."],
+    ["der Müll (US)", "trash", "Gemeint ist Abfall. In der britischen Liste steht „rubbish“."],
+    ["die Süßigkeiten (US)", "candy", "„Candy“ kann auch mehrere Süßigkeiten bezeichnen. Die britische Entsprechung lautet „sweets“."]
+  ]],
+  ['Sport, Kultur und unterwegs', [
+    ['auftreten / aufführen','perform'],
+    ['der Krieg','war'],
+    ['sowohl … als auch …','as well as'],
+    ['der Verband / die Vereinigung','association'],
+    ['wahrscheinlich','probably'],
+    ['Fußball (US)','soccer','In den USA meint „football“ normalerweise American Football.'],
+    ['der Tennis- oder Basketballplatz','court'],
+    ['der Marathonlauf','marathon'],
+    ['eines Tages','one day|some day|someday'],
+    ['etwas empfehlen','recommend sth.|recommend something|recommend','Ein c und zwei m: recommend.'],
+    ['der Werbespot','commercial'],
+    ['der Flügel','wing'],
+    ['fahren / verkehren (Bus, Bahn)','run'],
+    ['sich beziehen auf','refer to'],
+    ['der Ausgang / die Ausfahrt','exit'],
+    ['die Situation','situation'],
+    ['der Sitzplatz','seat','„Take a seat“ bedeutet „Platz nehmen“.'],
+    ["männlich", "male", "„Male“ heißt „männlich“. Das Gegenstück „female“ beginnt mit „fe-“."],
+    ["weiblich", "female", "„Female“ heißt „weiblich“. Achte auf die ersten beiden Buchstaben „fe-“."]
+  ]]
+];
+
+
+function normalize(text, reverse) {
+  const articles = reverse ? /^(?:der|die|das|ein|eine)\s+/i : /^(?:a|an|the|to)\s+/;
+  return text.normalize('NFKC').replace(/[.!?…]+/g,' ').replace(/\s+/g,' ').trim().replace(articles,'');
+}
+
+function closeWord(typed, expected) {
+  if (typed.length < 4 || expected.length < 4 || Math.abs(typed.length - expected.length) > 1) return false;
+  let i = 0;
+  while (i < Math.min(typed.length, expected.length) && typed[i] === expected[i]) i++;
+  if (typed.length === expected.length) {
+    return typed.slice(i + 1) === expected.slice(i + 1) ||
+      (typed[i] === expected[i + 1] && typed[i + 1] === expected[i] && typed.slice(i + 2) === expected.slice(i + 2));
+  }
+  const [longer, shorter] = typed.length > expected.length ? [typed, expected] : [expected, typed];
+  return longer.slice(i + 1) === shorter.slice(i);
+}
+
+const pitfalls = [
+  [
+    "„Liberty“ und „freedom“ heißen beide „Freiheit“. Der Name der Freiheitsstatue lautet „Statue of Liberty“.",
+    "Bei „I prefer tea to coffee“ mag die Person Tee lieber. Nach „prefer“ steht zuerst die bevorzugte Sache, danach folgt „to“.",
+    "„Out and about“ ist ein fester Ausdruck. „Out“ allein kann je nach Satz auch „draußen“ oder „aus“ bedeuten.",
+    "Englisch „accent“ hat zwei c. Die deutsche Schreibweise „Akzent“ hat k und z.",
+    "„Homesick“ bedeutet, dass du dein Zuhause vermisst. „Sick“ allein heißt meistens „krank“. Mit „for“ kannst du sagen, wen oder was du vermisst.",
+    "„Trade“ meint hier Handel. Ein einzelnes Geschäft, in dem du einkaufst, heißt „shop“ oder „store“.",
+    "„Ferry“ hat zwei r. Eine „ferry“ bringt Menschen oder Fahrzeuge über das Wasser.",
+    "„A local“ ist eine Person aus dem Ort. In „a local shop“ beschreibt „local“ dagegen das Geschäft: ein Laden vor Ort.",
+    "„Awesome“ ist umgangssprachlich und heißt „echt klasse“. Beim Schreiben hilft die Aufteilung „awe + some“.",
+    "„Immigrant“ beginnt mit i und hat zwei m. Ein „immigrant“ wandert in ein Land ein, ein „emigrant“ wandert aus einem Land aus.",
+    "Im Freizeitpark ist „a ride“ ein Fahrgeschäft. „To ride“ ist auch ein Verb und kann zum Beispiel „reiten“ oder „Rad fahren“ bedeuten."
+  ],
+  [
+    "„Diverse“ beschreibt eine Gruppe mit vielen unterschiedlichen Menschen oder Dingen. Das englische Wort für „Die Vielfalt“ lautet „diversity“.",
+    "Ein „chart“ stellt Informationen übersichtlich dar, etwa in einem Balkendiagramm. In „a bar chart“ steckt das Wort „bar“ für Balken.",
+    "Bei „separate“ steht in der Wortmitte ein a: sep-a-rate. Die häufige Schreibweise „seperate“ hat dort ein e anstelle des a.",
+    "„Comma“ hat zwei m. Ein Dezimalpunkt heißt im Englischen „point“, etwa in „one point six“ für 1,6.",
+    "„Certain“ bedeutet in „Are you certain?“ so viel wie „sicher“. „Certainly“ ist eine andere Form und heißt zum Beispiel „sicherlich“.",
+    "„Back then“ blickt auf eine frühere Zeit zurück. „Then“ allein kann je nach Satz auch „dann“ heißen.",
+    "„Equal“ steht für „gleich“ oder „gleichberechtigt“. „Unequal“ bedeutet „ungleich“.",
+    "„Opportunity“ hat zwei p. „Chance“ ist hier ebenfalls möglich. Denk an eine Gelegenheit, etwas zu tun.",
+    "„Grandchild“ ist Enkel oder Enkelin. „Grandchildren“ ist die Mehrzahl. „Grandparent“ bezeichnet dagegen einen Großelternteil.",
+    "Bei „university“ steht am Anfang ein u. Der Anfang klingt wie „you“, deshalb sagt man „a university“.",
+    "„Challenge“ hat zwei l. Eine „challenge“ ist eine Herausforderung, „challenging“ bedeutet „herausfordernd“.",
+    "„Grandchildren“ ist die Mehrzahl von „grandchild“. Die Endung lautet „-children“."
+  ],
+  [
+    "„Mouth“ schreibt man mit ou und th. „Mouse“ heißt „Maus“.",
+    "„Restroom“ ist in den USA die Toilette in einem öffentlichen Gebäude. Schreibe „rest“ und „room“ als ein Wort.",
+    "In den USA sagt man „backpack“. „Rucksack“ ist die britische Vokabel aus der Tabelle.",
+    "In den USA sagt man „cookie“. „Biscuit“ ist hier das britische Wort für Keks.",
+    "In den USA heißt ein Film „movie“. „Movie theater“ ist das Kino, in dem der Film läuft.",
+    "„Movie theater“ besteht aus zwei Wörtern. „Theater“ ist die US-Schreibweise. „Cinema“ ist das britische Wort aus der Tabelle.",
+    "„Sneakers“ ist in der Aufgabe Mehrzahl. „Trainers“ ist das britische Wort aus der Tabelle.",
+    "In New York heißt die U-Bahn „subway“. In der britischen Vokabelliste steht „underground“.",
+    "„Vacation“ ist die US-Vokabel. „Holiday“ ist die britische Entsprechung in der Tabelle.",
+    "In den USA heißen Pommes „French fries“ oder kurz „fries“. „Chips“ sind dort Kartoffelchips.",
+    "In den USA heißen Kartoffelchips „potato chips“ oder kurz „chips“. In Großbritannien heißen sie „crisps“.",
+    "„Mom“ schreibt man in den USA mit o. In Großbritannien sagt man „mum“.",
+    "„Pants“ steht im Englischen in der Mehrzahl, auch wenn nur eine Hose gemeint ist.",
+    "Für einen Laden steht hier die US-Vokabel „store“. In der britischen Liste steht „shop“.",
+    "Gemeint ist Abfall. In der britischen Liste steht „rubbish“.",
+    "„Candy“ kann auch mehrere Süßigkeiten bezeichnen. Die britische Entsprechung lautet „sweets“."
+  ],
+  [
+    "„Perform“ ist das Verb für „auftreten“ oder „aufführen“. „Performance“ ist das Nomen für eine Aufführung.",
+    "„War“ heißt „Krieg“. „Wars“ ist die Mehrzahl. In „World War“ bedeutet „world“ Welt.",
+    "Die feste Wortfolge lautet: „as well as“. Er verbindet zwei Dinge, die beide gemeint sind.",
+    "„Association“ hat am Anfang zwei s: „asso-“. Gemeint ist hier ein Verband oder eine Vereinigung.",
+    "„Probably“ hat nach „pro“ ein b: „prob-ably“. „Perhaps“ bedeutet „vielleicht“. „Probably“ drückt mehr Sicherheit aus.",
+    "In den USA heißt Fußball „soccer“, mit zwei c. „Football“ meint dort meistens American Football.",
+    "„Court“ ist hier ein Platz für Tennis oder Basketball. Für einen Fußballplatz sagt man zum Beispiel „pitch“.",
+    "„Marathon“ hat im Englischen ein th. Es bezeichnet den Lauf, „runner“ die Person, die läuft.",
+    "„One day“ besteht aus zwei Wörtern und kann „eines Tages“ heißen. Für die Zukunft passt auch „someday“.",
+    "„Recommend“ hat ein c und zwei m. „Recommendation“ heißt „Empfehlung“.",
+    "„A commercial“ ist hier ein Werbespot. Mit „commercial“ ohne Artikel kann man auch sagen, dass etwas kommerziell ist.",
+    "„Wing“ ist ein Flügel. „Wind“ heißt „Wind“: Achte auf den letzten Buchstaben.",
+    "Beim Bus oder Zug bedeutet „run“, dass er fährt oder verkehrt. Bei Menschen kann dasselbe Verb „laufen“ heißen.",
+    "Zum Ausdruck gehört das kleine Wort „to“: „refer to“. Damit sagst du, worauf sich etwas bezieht.",
+    "„Exit“ ist der Ausgang oder die Ausfahrt. „Entrance“ ist der Eingang.",
+    "In „situation“ steht am Ende „-ation“. Achte am Anfang auf „situ-“, wie in „Situation“.",
+    "„Seat“ ist ein Sitzplatz. „Sit“ ist das Verb „sitzen“. „Take a seat“ heißt „Platz nehmen“.",
+    "„Male“ heißt „männlich“. Das Gegenstück „female“ beginnt mit „fe-“.",
+    "„Female“ heißt „weiblich“. Achte auf die ersten beiden Buchstaben „fe-“."
+  ]
+];
+
+
+const britishPractice = [
+  [
+    "mum",
+    "mom",
+    "Auf das o in „mom“ achten."
+  ],
+  [
+    "rucksack",
+    "backpack",
+    "In „backpack“ steckt „back“ für Rücken."
+  ],
+  [
+    "biscuit",
+    "cookie",
+    "Hier ist ein süßer Keks gemeint."
+  ],
+  [
+    "chips",
+    "French fries|french fries|fries",
+    "US-„chips“ sind Kartoffelchips. Hier sind Pommes gemeint."
+  ],
+  [
+    "crisps",
+    "potato chips|chips",
+    "Britische „crisps“ sind die US-„chips“."
+  ],
+  [
+    "film",
+    "movie",
+    "„Movie theater“ ist das Kino. Hier ist der Film gemeint."
+  ],
+  [
+    "cinema",
+    "movie theater",
+    "Zwei Wörter. In den USA schreibt man „theater“."
+  ],
+  [
+    "trousers",
+    "pants",
+    "„Pants“ steht auch für eine einzelne Hose in der Mehrzahl."
+  ],
+  [
+    "trainers",
+    "sneakers",
+    "Gemeint sind Turnschuhe. Achte auf das s am Ende."
+  ],
+  [
+    "shop",
+    "store",
+    "In dieser Übung ist das US-Wort „store“ gesucht."
+  ],
+  [
+    "underground",
+    "subway",
+    "In New York fährt man mit der „subway“."
+  ],
+  [
+    "rubbish",
+    "trash",
+    "Gemeint ist Müll."
+  ],
+  [
+    "holiday",
+    "vacation",
+    "Gemeint ist Urlaub."
+  ],
+  [
+    "sweets",
+    "candy",
+    "„Candy“ kann mehrere Süßigkeiten meinen."
+  ]
+];
+
+const extraGerman = {
+  'be homesick':['Sehnsucht nach zu Hause haben'], local:['Einwohner','Einwohnerin'],
+  'movie theater':['Lichtspielhaus'], court:['Platz','Court','Tennisplatz','Basketballplatz'],
+  'prefer sth. to sth.':['etwas vorziehen','etwas bevorzugen','etwas lieber haben'],
+  'out and about':['draußen unterwegs'], restroom:['Toilette','WC','öffentliche Toilette'],
+  run:['fahren','verkehren'], 'refer to':['Bezug nehmen auf'], seat:['Platz','Sitz'],
+  ride:['Fahrt','Fahrgeschäft'], awesome:['toll','stark','super','großartig'],
+  soccer:['Fussball'], grandchild:['Enkelkind'], grandchildren:['Enkelkinder','Enkel'], commercial:['Werbung','Reklame']
+};
+const storageKey = 'vocabularyNYCG8';
+let state = {direction:0, entries:[{},{}], british:{}};
+try {
+  const stored = JSON.parse(localStorage.getItem(storageKey));
+  if (stored && stored.entries && stored.entries.length === 2 && (stored.direction === 0 || stored.direction === 1)) state = stored;
+} catch {}
+if (!state.british) state.british = {};
+const selector = document.querySelector('#direction');
+const content = document.querySelector('#rounds');
+selector.value = state.direction;
+const total = rounds.reduce((sum, [,words]) => sum + words.length, britishPractice.length);
+
+function persist() {
+  try { localStorage.setItem(storageKey, JSON.stringify(state)); }
+  catch { document.querySelector('#storage').textContent = 'Der Stand bleibt bis zum Schließen der Seite erhalten.'; }
+}
+
+function updateProgress() {
+  let checked = 0;
+  let correct = 0;
+  content.querySelectorAll('.round').forEach(round => {
+    const done = round.querySelectorAll('article[data-result]').length;
+    const right = round.querySelectorAll('article[data-result="correct"]').length;
+    round.querySelector('.count').textContent = done + ' von ' + round.querySelectorAll('article').length + ' geprüft · ' + right + ' richtig';
+    checked += done;
+    correct += right;
+  });
+  const bar = document.querySelector('#progress');
+  bar.max = total;
+  bar.value = checked;
+  document.querySelector('#progress-text').textContent = checked + ' von ' + total + ' Wörtern geprüft · ' + correct + ' richtig';
+}
+
+function render() {
+  content.textContent = '';
+  const allRounds = [...rounds, ['British → American English', britishPractice]];
+  allRounds.forEach(([title, words], roundIndex) => {
+    const british = roundIndex === rounds.length;
+    const reverse = !british && state.direction === 1;
+    const entries = british ? state.british : state.entries[state.direction];
+    const round = document.createElement('details');
+    round.className = 'round';
+    round.innerHTML = '<summary></summary>';
+    const summary = round.querySelector('summary');
+    summary.textContent = title;
+    const count = document.createElement('span');
+    count.className = 'count';
+    summary.append(count);
+    if (british) {
+      const instruction = document.createElement('p');
+      instruction.textContent = 'Links steht das britische Wort. Tippe die entsprechende US-Vokabel ein.';
+      round.append(instruction);
+    }
+    words.forEach(([german, english, tip], wordIndex) => {
+      const key = roundIndex + '-' + wordIndex;
+      const versions = english.split('|');
+      const germanVersions = german.replace(/ \([^)]*\)/g,'').split(' / ');
+      const answers = reverse ? germanVersions.concat(extraGerman[versions[0]] || []) : versions;
+      const accepted = answers.map(value => normalize(value, reverse));
+      const row = document.createElement('article');
+      row.innerHTML = '<form><label></label><input type="text" maxlength="120" required autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="none" enterkeyhint="go"><button type="submit" disabled>Prüfen</button></form><p class="feedback" role="status"></p><details class="pitfall" hidden><summary>Typische Stolperfallen</summary><p></p></details><details class="answer" hidden><summary>Lösung anzeigen</summary><p class="solution"></p><p class="tip"></p></details>';
+      const field = row.querySelector('input');
+      const label = row.querySelector('label');
+      field.id = 'word-' + key;
+      if (reverse) field.setAttribute('autocapitalize', 'sentences');
+      field.lang = reverse ? 'de' : 'en';
+      label.htmlFor = field.id;
+      label.lang = reverse || british ? 'en' : 'de';
+      label.textContent = reverse ? versions[0] : german;
+      const feedback = row.querySelector('.feedback');
+      const solution = row.querySelector('.answer');
+      const pitfall = row.querySelector('.pitfall');
+      const button = row.querySelector('button');
+      row.querySelector('.solution').textContent = reverse ? germanVersions.join(' / ') : versions.join(' / ');
+      row.querySelector('.solution').lang = reverse ? 'de' : 'en';
+      row.querySelector('.tip').textContent = tip || 'Tipp: Lies das Wort, decke es ab und tippe es noch einmal aus dem Kopf.';
+      field.value = (entries[key] && entries[key].text) || '';
+      function show() {
+        const value = normalize(field.value, reverse);
+        button.disabled = !value;
+        if (!value || (!entries[key] || !entries[key].checked)) {
+          delete row.dataset.result;
+          feedback.textContent = '';
+          solution.hidden = true;
+          solution.open = false;
+          pitfall.hidden = true;
+          pitfall.open = false;
+          return;
+        }
+        const exact = accepted.includes(value);
+        const wrongCase = !exact && accepted.some(answer => answer.toLowerCase() === value.toLowerCase());
+        const near = !exact && !wrongCase && accepted.some(answer => closeWord(value, answer));
+        const hint = wrongCase
+          ? (reverse
+              ? 'Im Deutschen beginnen Nomen mit einem Großbuchstaben. Verben und Adjektive schreibst du in dieser Übung normalerweise klein.'
+              : 'Schreib normale englische Vokabeln klein. Eigennamen behalten ihre Großbuchstaben.')
+          : british ? tip : pitfalls[roundIndex][wordIndex];
+        pitfall.querySelector('p').textContent = hint;
+        row.dataset.result = exact ? 'correct' : near ? 'near' : 'retry';
+        feedback.className = 'feedback ' + (exact ? 'good' : near ? 'near' : '');
+        feedback.textContent = exact ? 'Richtig!' : wrongCase ? 'Falsch geschrieben. Prüfe die Groß- und Kleinschreibung.' : near ? 'Fast richtig. Schau unter „Typische Stolperfallen“ nach.' : 'Die Antwort wurde nicht erkannt. Unter „Typische Stolperfallen“ findest du eine Erklärung.';
+        solution.hidden = false;
+        pitfall.hidden = exact;
+        if (exact) pitfall.open = false;
+      }
+      field.addEventListener('input', () => {
+        entries[key] = {text:field.value, checked:false};
+        show();
+        updateProgress();
+        persist();
+      });
+      row.querySelector('form').addEventListener('submit', event => {
+        event.preventDefault();
+        if (!normalize(field.value, reverse)) return;
+        entries[key] = {text:field.value, checked:true};
+        show();
+        updateProgress();
+        persist();
+      });
+      show();
+      round.append(row);
+    });
+    content.append(round);
+  });
+  updateProgress();
+}
+
+selector.addEventListener('change', () => {
+  state.direction = Number(selector.value);
+  persist();
+  render();
+});
+document.querySelector('#reset').addEventListener('click', () => {
+  if (!confirm('Alle Antworten in dieser Übungsrichtung und in der Runde British → American English löschen?')) return;
+  state.entries[state.direction] = {};
+  state.british = {};
+  persist();
+  render();
+});
+render();
+document.querySelector('#exercise').hidden = false;
+document.querySelector('#preview-help').hidden = true;
+</script>
+</html>
